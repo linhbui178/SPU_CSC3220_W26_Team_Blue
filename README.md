@@ -3,3 +3,9 @@
 Email: buil@spu.edu  
 Phone number: 2067979494  
 GitHub user ID: 194539798  
+
+
+Name: Noel Mehari
+Email: meharin@spu.edu
+Phone: 206-670-6937
+GitHub user: noelmehari2005
