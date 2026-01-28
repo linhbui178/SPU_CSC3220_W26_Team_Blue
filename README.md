@@ -9,3 +9,9 @@ Name: Noel Mehari
 Email: meharin@spu.edu
 Phone: 206-670-6937
 GitHub user: noelmehari2005
+
+Name:Robel Arega
+Email:Aregar@spu.edu
+Alternate Email: Robel.a828@gmail.com
+phone: 206-536-5206
+GitHub User: Ro210
