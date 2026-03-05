@@ -57,15 +57,16 @@ bool validateLength(const string &name) {
     return true;
 }
 
-bool itemNameExists(const string &ItemName) {
+bool itemNameExists(const string &ItemName, const int &UserId) {
     mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
     mysqlx::Schema DB = session.getSchema("PantryPal");
     mysqlx::Table Item = DB.getTable("Item");
 
     auto Read = Item
     .select("ItemName")
-    .where("ItemName = :item_name") // where user id = user id
+    .where("ItemName = :item_name and UserId = :user_id") // where user id = user id
     .bind("item_name", ItemName)
+    .bind("user_id", UserId)
     .execute();
 
     if (Read.count() > 0) {
@@ -331,7 +332,7 @@ int main() {
                         if (!validateLength(ItemName)) {
                             cout << "Invalid length" << endl;
                         }
-                        else if (itemNameExists(ItemName)) {
+                        else if (itemNameExists(ItemName, UserId)) {
                             cout << "Item already exists" << endl;
                         }
                         else {
@@ -351,7 +352,13 @@ int main() {
                     }
 
                     // get item category
-                        // find catid
+                    /*cout << "Enter item category: " << endl;
+                     *if not exist
+                     *1. create new
+                     *2. enter other category
+                     *find cat id
+                     *CatId = findCatId(Category, ItemCat)
+                     */
 
                     // get item description
                     cout << "Enter item description (Press Enter to skip): " << endl;
@@ -391,7 +398,7 @@ int main() {
                     cout << "Enter item name: " << endl;
                     cin.ignore();
                     while (getline(cin, ItemName)) {
-                        if (itemNameExists(ItemName)) {
+                        if (itemNameExists(ItemName, UserId)) {
                             break;
                         }
                         cout << "Item does not exist" << endl;
@@ -410,7 +417,7 @@ int main() {
                                 if (!validateLength(newItemName)) {
                                     cout << "Invalid length" << endl;
                                 }
-                                else if (itemNameExists(newItemName)) {
+                                else if (itemNameExists(newItemName, UserId)) {
                                     cout << "Item already exists" << endl;
                                 }
                                 else {
@@ -490,6 +497,13 @@ int main() {
                         }
 
                         if (choice == 3) { // update item category
+                            /*find itemid
+                             *ItemId = findItemId(Item, ItemName)
+                             *get catid
+                             *cout << "Enter new item category << endl;
+                             *while (getline(cin, ItemCat)
+                             *check if length is valid;
+                             */
                         }
 
                         if (choice == 4) { // update item description
