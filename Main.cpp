@@ -51,7 +51,6 @@ void printOptions() {
 
 bool validateLength(const string &name) {
     if (name.length() > 254) {
-        cout << "Invalid length" << endl;
         return false;
     }
     return true;
@@ -330,7 +329,7 @@ int main() {
                     cin.ignore();
                     while (getline(cin, ItemName)) {
                         if (!validateLength(ItemName)) {
-                            cout << "Invalid length" << endl;
+                            cout << "Item name too long" << endl;
                         }
                         else if (itemNameExists(ItemName, UserId)) {
                             cout << "Item already exists" << endl;
@@ -371,7 +370,7 @@ int main() {
                         if (validateLength(ItemDesc)) {
                             break;
                         }
-                        cout << "Invalid length" << endl;
+                        cout << "Item description too long" << endl;
                         cout << "Enter item description (Press Enter to skip): " << endl;
                     }
 
@@ -415,7 +414,7 @@ int main() {
                             cin.ignore();
                             while (getline(cin, newItemName)) {
                                 if (!validateLength(newItemName)) {
-                                    cout << "Invalid length" << endl;
+                                    cout << "Item name too long" << endl;
                                 }
                                 else if (itemNameExists(newItemName, UserId)) {
                                     cout << "Item already exists" << endl;
@@ -515,7 +514,7 @@ int main() {
                                 if (validateLength(ItemDesc)) {
                                     break;
                                 }
-                                cout << "Invalid length" << endl;
+                                cout << "Item description too long" << endl;
                                 cout << "Enter new item description: " << endl;
                             }
 
