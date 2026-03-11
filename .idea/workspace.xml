@@ -30,9 +30,8 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08a10d4a-45fe-465b-9e06-600295829de6" name="Changes" comment="">
+    <list default="true" id="08a10d4a-45fe-465b-9e06-600295829de6" name="Changes" comment="EXP data values changed.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,6 +145,15 @@
       <workItem from="1773020470419" duration="6391000" />
       <workItem from="1773080145511" duration="3737000" />
     </task>
+    <task id="LOCAL-00001" summary="EXP data values changed.">
+      <option name="closed" value="true" />
+      <created>1773209671615</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1773209671615</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -159,6 +167,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Merge remote-tracking branch 'origin/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;Main.cpp" />
     <MESSAGE value="Disregard" />
-    <option name="LAST_COMMIT_MESSAGE" value="Disregard" />
+    <MESSAGE value="EXP data values changed." />
+    <option name="LAST_COMMIT_MESSAGE" value="EXP data values changed." />
   </component>
 </project>
