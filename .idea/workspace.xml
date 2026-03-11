@@ -97,9 +97,14 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <list>
-      <item itemvalue="CMake Debug.SPU_CSC3220_W26_Team_Blue" />
       <item itemvalue="CMake Application.SPU_CSC3220_W26_Team_Blue" />
+      <item itemvalue="CMake Debug.SPU_CSC3220_W26_Team_Blue" />
     </list>
     <recent_temporary>
       <list>
@@ -125,6 +130,9 @@
       <workItem from="1772846711775" duration="17375000" />
       <workItem from="1773020470419" duration="6391000" />
       <workItem from="1773080145511" duration="3737000" />
+      <workItem from="1773084812947" duration="361000" />
+      <workItem from="1773196164626" duration="2308000" />
+      <workItem from="1773198512454" duration="1010000" />
     </task>
     <servers />
   </component>
