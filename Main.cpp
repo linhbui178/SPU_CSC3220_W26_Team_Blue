@@ -86,15 +86,15 @@ bool itemExists(const string &ItemName, const int &UserId) {
     return false;
 }
 
-bool categoryExists(const string &CatName) {
+bool categoryExists(const int &CatId) {
     mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
     mysqlx::Schema DB = session.getSchema("PantryPal");
     mysqlx::Table Category = DB.getTable("Category");
 
     auto Read = Category
-    .select("CatName")
-    .where("CatName = :cat_name")
-    .bind("cat_name", CatName)
+    .select("CatId")
+    .where("CatId = :cat_id")
+    .bind("cat_id", CatId)
     .execute();
 
     if (Read.count() > 0) {
@@ -123,14 +123,13 @@ int findCatId(const string &CatName) {
 }
 
 void viewCategories() {
-    int option;
-
     try {
         mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
         session.sql("USE PantryPal").execute();
 
-        auto result = session.sql("SELECT CatName "
-                                        "FROM Category ")
+        auto result = session.sql("SELECT CatId, CatName "
+                                        "FROM Category "
+                                        "ORDER BY CatId")
                                         .execute();
 
         cout << "\n=== Categories ===\n";
@@ -138,12 +137,12 @@ void viewCategories() {
         auto row = result.fetchOne();
 
         if (!row) {
-            cout << "\n No categories available" << endl;
+            cout << "\nNo categories available" << endl;
         }
 
         else {
             do {
-                cout << static_cast<int>(row[0]) << "   " << static_cast<string>(row[1]) << endl;
+                cout << row[0].get<int>() << "   " << row[1].get<string>() << endl;
             }
             while (row = result.fetchOne());
         }
@@ -151,39 +150,18 @@ void viewCategories() {
     catch (const mysqlx::Error &err) {
         cerr << "\nConnection error: " << err.what() << endl;
     }
-
-    while (true) {
-        cout << "\n1. Back to main menu" << endl;
-        cout << "Enter your choice: ";
-
-        if (!(cin >> option)) {
-            cout << "Invalid input!" << endl;
-            cout << "Please enter a number" << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            continue;
-        }
-
-        if (option == 1) {
-            break;
-        }
-
-        cout << "Invalid choice" << endl;
-    }
 }
 
 void viewItems(const int &UserId) {
-    int option;
-
     try {
         mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
         session.sql("USE PantryPal").execute();
 
-        auto result = session.sql("SELECT ItemName, CatName, ItemQuant, ItemDesc, created_on, ExpDate,  "
+        auto result = session.sql("SELECT ItemName, CatName, ItemQuant, ItemDesc, Item.created_on, exp_date "
                                         "FROM Item "
                                         "JOIN Category ON Item.CatId = Category.CatId "
                                         "JOIN Expiration ON Item.ItemId = Expiration.ItemId "
-                                        "WHERE UserId = ?")
+                                        "WHERE Item.UserId = ?")
                                         .bind(UserId)
                                         .execute();
 
@@ -192,7 +170,7 @@ void viewItems(const int &UserId) {
         auto row = result.fetchOne();
 
         if (!row) {
-            cout << "\n You have no items" << endl;
+            cout << "\nYou have no items" << endl;
         }
 
         else {
@@ -211,25 +189,6 @@ void viewItems(const int &UserId) {
     }
     catch (const mysqlx::Error &err) {
         cerr << "\nConnection error: " << err.what() << endl;
-    }
-
-    while (true) {
-        cout << "\n1. Back to main menu" << endl;
-        cout << "Enter your choice: ";
-
-        if (!(cin >> option)) {
-            cout << "Invalid input!" << endl;
-            cout << "Please enter a number" << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            continue;
-        }
-
-        if (option == 1) {
-            break;
-        }
-
-        cout << "Invalid choice" << endl;
     }
 }
 
@@ -273,16 +232,18 @@ void addItem(const int &UserId) {
         // get item category
         viewCategories();
         while (true) {
-            cout << "Enter item category: ";
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            getline(cin, CatName);
-            if (!itemExists(ItemName, UserId)) {
-                cout << "Category does not exist" << endl;
+            cout << "Enter category number: ";
+            if (!(cin >> CatId)) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid input!" << endl;
+                cout << "Please enter a number" << endl;
+                continue;
             }
-            else {
-                CatId = findCatId(CatName);
-                break;
+            if (!categoryExists(CatId)) {
+                cout << "Invalid choice" << endl;
             }
+            break;
         }
 
         // get item description
@@ -351,7 +312,7 @@ void addItem(const int &UserId) {
 
 void updateItem(const int &UserId) {
 
-    int choice, ItemId, ItemQuant, newItemQuant, option;
+    int choice, ItemId, ItemQuant, newItemQuant, option, CatId;
     string ItemName, ItemCategory, ItemDesc, newItemName, newItemCat, newItemDesc;
 
     while (true) {
@@ -523,14 +484,21 @@ void updateItem(const int &UserId) {
 
             else if (choice == 3) {
                 // update item category
-                /*cout << "Enter new item category << endl;
-                 *while (getline(cin, ItemCat)
-                 *if not exist
-                 *1. enter another
-                 *2. ?
-                 *get CatID
-                 *update
-                 */
+                viewCategories();
+                while (true) {
+                    cout << "Enter new category number: ";
+                    if (!(cin >> CatId)) {
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        cout << "Invalid input!" << endl;
+                        cout << "Please enter a number" << endl;
+                        continue;
+                    }
+                    if (!categoryExists(CatId)) {
+                        cout << "Invalid choice" << endl;
+                    }
+                    break;
+                }
             }
 
             else if (choice == 4) { // update item description
@@ -864,12 +832,12 @@ int main() {
         session.sql(
             "CREATE TABLE IF NOT EXISTS Category ("
             "  CatId INT AUTO_INCREMENT PRIMARY KEY,"
-            "  CatName VARCHAR(255) NOT NULL"
+            "  CatName VARCHAR(255) NOT NULL UNIQUE"
             ")"
         ).execute();
 
         session.sql(
-            "INSERT INTO Category (CatName) VALUES "
+            "INSERT IGNORE INTO Category (CatName) VALUES "
                 "('Dairy'),"
                 "('Fruits'),"
                 "('Vegetables'),"
@@ -893,6 +861,18 @@ int main() {
             "  ItemQuant INT NOT NULL,"
             "  ItemDesc VARCHAR(255),"
             "  created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")"
+        ).execute();
+
+        session.sql(
+            "CREATE TABLE IF NOT EXISTS Expiration ("
+            "  exp_alert INT PRIMARY KEY,"
+            "  ItemId INT,"
+            "  FOREIGN KEY (ItemId) references Item(ItemId),"
+            "  exp_date date NOT NULL,"
+            "  is_dismissed bool,"
+            "  created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," // i'm not sure
+            "  updated_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
             ")"
         ).execute();
 
