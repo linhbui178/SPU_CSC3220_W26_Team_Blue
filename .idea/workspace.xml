@@ -30,8 +30,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08a10d4a-45fe-465b-9e06-600295829de6" name="Changes" comment="Modified Files">
-      <change beforePath="$PROJECT_DIR$/User.cpp" beforeDir="false" />
+    <list default="true" id="08a10d4a-45fe-465b-9e06-600295829de6" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,9 +68,13 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/CurrentUser.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/CurrentUser.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Users/noelmehari/CLionProjects/SPU_CSC3220_W26_Team_Blue/Main.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/noelmehari/CLionProjects/SPU_CSC3220_W26_Team_Blue/Main.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Main.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/noelmehari/CLionProjects/SPU_CSC3220_W26_Team_Blue/Main.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/noelmehari/CLionProjects/SPU_CSC3220_W26_Team_Blue/Main.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/noelmehari/CLionProjects/SPU_CSC3220_W26_Team_Blue/Main.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/noelmehari/CLionProjects/SPU_CSC3220_W26_Team_Blue/Main.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="6XOqTbb7" />
@@ -161,6 +166,7 @@
       <workItem from="1773102839194" duration="7907000" />
       <workItem from="1773112051958" duration="9512000" />
       <workItem from="1773190598166" duration="323000" />
+      <workItem from="1773205755957" duration="7000" />
     </task>
     <task id="LOCAL-00001" summary="Modified Files">
       <option name="closed" value="true" />

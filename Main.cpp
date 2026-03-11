@@ -32,6 +32,7 @@ void PasswordValidation() {
         "Password must contain at least one number\n"
         "Password must contain at least one uppercase letter\n"
         "Password must contain at least one lowercase letter\n"
+        "Password may not contain any Special characters\n"
         "Enter password here: ";
 }
 
@@ -129,7 +130,7 @@ void viewItems(const int &UserId) {
         auto result = session.sql("SELECT ItemName, ItemQuant, ItemDesc, CatName "
                                         "FROM Item "
                                         "JOIN Category ON Item.CatId = Category.CatId "
-                                        "WHERE UserId = ?")
+                                        "WHERE Userid = ?") //needs to be adjusted so it understands where the condition needs to be met
                                         .bind(UserId)
                                         .execute();
 
@@ -179,8 +180,6 @@ void viewItems(const int &UserId) {
 
 void addItem(const int &UserId) {
     int ItemQuant, CatId, option;
-    string ItemName, ItemDesc, ItemCategory;
-    int ItemQuant, option;
     string ItemName, ItemDesc, ItemCategory, ItemExp;
 
     while (true) {
@@ -225,7 +224,6 @@ void addItem(const int &UserId) {
          *CatId = findCatId(Category, ItemCat)
          */
 
-        // get item description
 
         while (true) {
             cout << "Enter item description (Press Enter to skip): ";
@@ -284,7 +282,7 @@ void addItem(const int &UserId) {
             mysqlx::Schema DB = session.getSchema("PantryPal");
             mysqlx::Table Item = DB.getTable("Item");
 
-            Item.insert("UserId", "CatId", "ItemName", "ItemQuant", "ItemDesc")
+            Item.insert("UserId", "CatId", "ItemName", "ItemQuant", "ItemDesc")// needs expiration and added on date (wont compile otherwise)
                 .values(UserId, CatId, ItemName, ItemQuant, ItemDesc)
                 .execute();
 
@@ -1283,8 +1281,6 @@ int main() {
     }
 
 
-
-
         cout << "Welcome to PantryPal" << endl;
         cout << "Would you like to create an account? (Y/N)"  << endl;
         cin >> UsersResponse;
@@ -1417,13 +1413,6 @@ int main() {
                         cout << "Welcome to The Pantry Pal: " << Profile.getUsername() << endl;
                     }
                 }
-
-                /*Item entity code goes here (
-                     Create
-                     Read
-                     Update
-                     Destroy
-                */
 
                 mainMenu(UserID); // only if email is valid
 
