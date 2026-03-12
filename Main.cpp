@@ -159,7 +159,8 @@ void viewItems(const int &UserId) {
                                         "DATE_FORMAT(Exp_date, '%Y-%m-%d') AS Exp_date "
                                         "FROM Item "
                                         "JOIN Category ON Item.CatId = Category.CatId "
-                                        "WHERE Item.UserId = ?")
+                                        "WHERE Item.UserId = ? "
+                                        "ORDER BY Exp_date ASC, Added_on ASC")
                                         .bind(UserId)
                                         .execute();
 
