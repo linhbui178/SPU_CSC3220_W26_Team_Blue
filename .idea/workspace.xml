@@ -32,6 +32,7 @@
   <component name="ChangeListManager">
     <list default="true" id="08a10d4a-45fe-465b-9e06-600295829de6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,18 +46,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Ro210"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Ro210&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/linhbui178/SPU_CSC3220_W26_Team_Blue.git",
-    "accountId": "dee6e8a6-ea7e-4467-af94-5be9e3cda373"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/linhbui178/SPU_CSC3220_W26_Team_Blue.git&quot;,
+    &quot;accountId&quot;: &quot;dee6e8a6-ea7e-4467-af94-5be9e3cda373&quot;
   }
-}]]></component>
+}</component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="6XOqTbb7" />
   </component>
@@ -84,6 +85,7 @@
     "CMake Application.SPU_CSC3220_W26_Team_Blue.executor": "Run",
     "CMake Debug.SPU_CSC3220_W26_Team_Blue.executor": "Debug",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.RadMigrateCodeStyle": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -94,12 +96,17 @@
     "RunOnceActivity.west.config.association.type.startup.service": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "C:/SPU_CSC3220_W26_Team_Blue",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "org.rust.first.attach.projects": "true",
     "settings.editor.selected.configurable": "CPPToolchains",
+    "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -108,11 +115,6 @@
       <method v="2" />
     </configuration>
     <configuration name="SPU_CSC3220_W26_Team_Blue" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SPU_CSC3220_W26_Team_Blue" TARGET_NAME="SPU_CSC3220_W26_Team_Blue" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SPU_CSC3220_W26_Team_Blue" RUN_TARGET_NAME="SPU_CSC3220_W26_Team_Blue">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -148,6 +150,8 @@
       <workItem from="1773084812947" duration="361000" />
       <workItem from="1773196164626" duration="2308000" />
       <workItem from="1773198512454" duration="4216000" />
+      <workItem from="1773296529744" duration="22000" />
+      <workItem from="1773296587785" duration="700000" />
     </task>
     <servers />
   </component>

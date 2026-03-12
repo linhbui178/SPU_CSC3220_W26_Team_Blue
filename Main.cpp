@@ -10,7 +10,9 @@
 #include <string>
 #include <string_view>
 #include <cctype>
+#include <iomanip>
 #include <limits>
+#include <sstream>
 
 #include "CurrentUser.h"
 
@@ -139,7 +141,7 @@ void printCategories() {
             do {
                 cout << row[0].get<int>() << "." << row[1].get<string>() << endl;
             }
-            while (row = result.fetchOne());
+            while ((row = result.fetchOne()));
         }
     }
     catch (const mysqlx::Error &err) {
@@ -184,7 +186,7 @@ void viewItems(const int &UserId) {
                 cout << "  Added on: " << row[4].get<string>() << endl;
                 cout << "  Expiry date: " << row[5].get<string>() << endl;
             }
-            while (row = result.fetchOne());
+            while ((row = result.fetchOne()));
         }
     }
     catch (const mysqlx::Error &err) {
@@ -628,10 +630,11 @@ void updateItem(const int &UserId) {
             else if (choice == 4) { // update item description
 
                 // get item description
-                while (getline(cin, newItemDesc)) {
+                while (true) {
                     cout << "Enter new item description: ";
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    if (validateLength(ItemDesc)) {
+                    getline(cin, newItemDesc);
+                    if (validateLength(newItemDesc)) {
                         break;
                     }
                     cout << "\nItem description too long" << endl;
@@ -679,7 +682,7 @@ void updateItem(const int &UserId) {
                     }
                     getline(cin, newItemExp);
 
-                    if (ItemExp.empty()) {
+                    if (newItemExp.empty()) {
                         cout << "Expiration date required\n";
                         continue;
                     }
@@ -975,7 +978,7 @@ void viewCategories() {
             do {
                 cout << row[0].get<int>() << "." << row[1].get<string>() << endl;
             }
-            while (row = result.fetchOne());
+            while ((row = result.fetchOne()));
         }
     }
     catch (const mysqlx::Error &err) {
@@ -1112,14 +1115,12 @@ int main() {
 
         session.sql(
             "CREATE TABLE IF NOT EXISTS Expiration ("
-            "  exp_alert INT PRIMARY KEY,"  // 0 or 1 (1:for true is expired and 0:for false is not yet expired)
+            "  exp_alert INT PRIMARY KEY,"
             "  ItemId INT,"
             "  FOREIGN KEY (ItemId) references Item(ItemId),"
             "  Exp_date TIMESTAMP NOT NULL,"
-            "  FOREIGN KEY (Exp_date) references Item(Exp_date),"
-            "  is_dismissed INT," //if the item was deleted then this should equal 1, if not then it should equal 0
-            "  Added_on TIMESTAMP NOT NULL,"
-            "  FOREIGN KEY (Added_on) references Item(Added_on)"
+            "  is_dismissed INT,"
+            "  Added_on TIMESTAMP NOT NULL"
             ")"
         ).execute();
 
