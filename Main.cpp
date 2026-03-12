@@ -195,7 +195,7 @@ void viewItems(const int &UserId) {
         cout << "Enter your choice: ";
 
         if (!(cin >> option)) {
-            cout << "Invalid input!" << endl;
+            cout << "\nInvalid input!" << endl;
             cout << "Please enter a number" << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -239,7 +239,7 @@ void addItem(const int &UserId) {
             if (!(cin >> ItemQuant)) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input!" << endl;
+                cout << "\nInvalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 continue;
             }
@@ -282,7 +282,9 @@ void addItem(const int &UserId) {
         while (true) {
 
             cout << "Enter item's expiration date (YYYY-MM-DD): ";
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            if (cin.peek() == '\n') {
+                cin.ignore();
+            }
             getline(cin, ItemExp);
 
             if (ItemExp.empty()) {
@@ -336,7 +338,7 @@ void addItem(const int &UserId) {
             cout << "Enter your choice: ";
 
             if (!(cin >> option)) {
-                cout << "Invalid input!" << endl;
+                cout << "\nInvalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -581,7 +583,7 @@ void updateItem(const int &UserId) {
                     if (!(cin >> newCatId)) {
                         cin.clear();
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                        cout << "Invalid input!" << endl;
+                        cout << "\nInvalid input!" << endl;
                         cout << "Please enter a number" << endl;
                         continue;
                     }
@@ -671,7 +673,9 @@ void updateItem(const int &UserId) {
                 while (true) {
 
                     cout << "Enter item's expiration date (YYYY-MM-DD): ";
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    if (cin.peek() == '\n') {
+                        cin.ignore();
+                    }
                     getline(cin, newItemExp);
 
                     if (ItemExp.empty()) {
@@ -982,7 +986,7 @@ void viewCategories() {
         cout << "Enter your choice: ";
 
         if (!(cin >> option)) {
-            cout << "Invalid input!" << endl;
+            cout << "\nInvalid input!" << endl;
             cout << "Please enter a number" << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -1002,9 +1006,9 @@ void mainMenu(const int &UserId) {
     int choice;
 
     while (true) {
-        cout << "\n====== PantryPal ======\n";
 
         while (true) {
+            cout << "\n====== PantryPal ======\n";
             cout << "\n1. View items" << endl;
             cout << "2. Add item" << endl;
             cout << "3. Update item" << endl;
@@ -1015,7 +1019,7 @@ void mainMenu(const int &UserId) {
             cout << "Enter your choice: ";
 
             if (!(cin >> choice)) {
-                cout << "Invalid input!" << endl;
+                cout << "\nInvalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -1043,7 +1047,7 @@ void mainMenu(const int &UserId) {
             viewCategories();
         }
         else if (choice == 7) {
-            cout << "Goodbye!" << endl;
+            cout << "\nGoodbye!" << endl;
             break;
         }
         else {
