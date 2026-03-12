@@ -6,7 +6,6 @@
 //
 #include <mysqlx/xdevapi.h>
 #include <iostream>
-#include <iomanip>
 #include <algorithm>
 #include <string>
 #include <string_view>
@@ -14,7 +13,6 @@
 #include <limits>
 
 #include "CurrentUser.h"
-#include "Item.h"
 
 using std::cout;
 using std::endl;
@@ -38,29 +36,12 @@ void PasswordValidation() {
 
 bool validDate(const std::string& input) {
 
-    tm tm = {};
+    std::tm tm = {};
     std::istringstream ss(input);
 
     ss >> std::get_time(&tm, "%Y-%m-%d");
 
-    if (ss.fail() || !ss.eof()) {
-        return false;
-    }
-
-    tm.tm_hour = 0;
-    tm.tm_min = 0;
-    tm.tm_sec = 0;
-
-    time_t parsedTime = mktime(&tm);
-    if (parsedTime == -1) {
-        return false;
-    }
-
-    std::tm *normalized = localtime(&parsedTime);
-
-    return normalized->tm_year == tm.tm_year &&
-           normalized->tm_mon == tm.tm_mon &&
-           normalized->tm_mday == tm.tm_mday;
+    return !ss.fail();
 }
 
 int findUserId(mysqlx::Table &Users, const string &Email) {
@@ -136,24 +117,6 @@ bool categoryExists(const int &CatId) {
     return false;
 }
 
-int findCatId(const string &CatName) {
-    mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
-    mysqlx::Schema DB = session.getSchema("PantryPal");
-    mysqlx::Table Category = DB.getTable("Category");
-
-    auto result = Category.select("CatId")
-    .where("CatName = :cat_name")
-    .bind("cat_name", CatName)
-    .execute();
-
-    auto row = result.fetchOne();
-
-    if (row) {
-        return row[0];
-    }
-    return -1;
-}
-
 void printCategories() {
     try {
         mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
@@ -192,12 +155,12 @@ void viewItems(const int &UserId) {
         session.sql("USE PantryPal").execute();
 
         auto result = session.sql("SELECT ItemName, CatName, ItemQuant, ItemDesc, "
-                                        "DATE_FORMAT(Item.Added_on, '%Y-%m-%d %H:%i:%s'), "
-                                        "DATE_FORMAT(Item.Exp_date, '%Y-%m-%d %H:%i:%s') "
+                                        "DATE_FORMAT(Added_on, '%Y-%m-%d') AS Added_on, "
+                                        "DATE_FORMAT(Exp_date, '%Y-%m-%d') AS Exp_date "
                                         "FROM Item "
                                         "JOIN Category ON Item.CatId = Category.CatId "
-                                        //"JOIN Expiration ON Item.ItemId = Expiration.ItemId "   // waiting for Robel to finish Expiration, ViewItems wont run otherwise
-                                        "WHERE Item.UserId = ?")
+                                        "WHERE Item.UserId = ? "
+                                        "ORDER BY Exp_date ASC, Added_on ASC")
                                         .bind(UserId)
                                         .execute();
 
@@ -211,16 +174,17 @@ void viewItems(const int &UserId) {
 
         else {
             do {
-                cout << "Item Name: " << row[0].get<string>();
-                cout << "\nCategory: " << row[1].get<string>() << endl;
-                cout << "\nItem Quantity: " << row[2].get<int>();
-                if (!row[3].isNull()) {
-                cout << "\nItem Description: " << row[3].get<string>();
+                cout << "\n- Name: " << row[0].get<string>() << endl;
+                cout << "  Category: " << row[1].get<string>() << endl;
+                cout << "  Quantity: " << row[2].get<int>()<< endl;
+                string desc = row[3].isNull() ? "" : row[3].get<string>();
+                if (desc.find_first_not_of(" \t\n\r") != string::npos) {
+                    cout << "  Description: " << desc << endl;
                 }
-                cout << "\nItem Added on: " << row[4].get<string>();
-                cout << "\nItem Expires on: " << row[5].get<string>();
+                cout << "  Added on: " << row[4].get<string>() << endl;
+                cout << "  Expiry date: " << row[5].get<string>() << endl;
             }
-            while (row == result.fetchOne());
+            while (row = result.fetchOne());
         }
     }
     catch (const mysqlx::Error &err) {
@@ -228,11 +192,11 @@ void viewItems(const int &UserId) {
     }
 
     while (true) {
-        cout << "\n\n1. Back to main menu" << endl;
+        cout << "\n1. Back to main menu" << endl;
         cout << "Enter your choice: ";
 
         if (!(cin >> option)) {
-            cout << "Invalid input!" << endl;
+            cout << "\nInvalid input!" << endl;
             cout << "Please enter a number" << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -276,7 +240,7 @@ void addItem(const int &UserId) {
             if (!(cin >> ItemQuant)) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input!" << endl;
+                cout << "\nInvalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 continue;
             }
@@ -315,10 +279,13 @@ void addItem(const int &UserId) {
             cout << "Item description too long" << endl;
         }
 
+        // get expiration date
         while (true) {
 
             cout << "Enter item's expiration date (YYYY-MM-DD): ";
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            if (cin.peek() == '\n') {
+                cin.ignore();
+            }
             getline(cin, ItemExp);
 
             if (ItemExp.empty()) {
@@ -331,34 +298,24 @@ void addItem(const int &UserId) {
                 continue;
             }
 
-            tm expTm = {};
-            std::istringstream expStream(ItemExp);
-            expStream >> std::get_time(&expTm, "%Y-%m-%d");
-
-            expTm.tm_hour = 0;
-            expTm.tm_min = 0;
-            expTm.tm_sec = 0;
-
-            time_t expTime = mktime(&expTm);
-
+            // Get today's date
             time_t now = time(nullptr);
-            tm todayTm = *localtime(&now);
-            todayTm.tm_hour = 0;
-            todayTm.tm_min = 0;
-            todayTm.tm_sec = 0;
+            tm* today = localtime(&now);
 
-            time_t todayTime = mktime(&todayTm);
+            char buffer[11];
+            strftime(buffer, sizeof(buffer), "%Y-%m-%d", today);
 
-            if (expTime < todayTime) {
+            string todayStr(buffer);
+
+            if (ItemExp < todayStr) {
                 cout << "Expiration date cannot be before today\n";
                 continue;
             }
 
             cout << "Valid expiration date entered.\n";
-            break;
+            break; // valid input
+
         }
-
-
 
         // add item
         try {
@@ -382,7 +339,7 @@ void addItem(const int &UserId) {
             cout << "Enter your choice: ";
 
             if (!(cin >> option)) {
-                cout << "Invalid input!" << endl;
+                cout << "\nInvalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -627,7 +584,7 @@ void updateItem(const int &UserId) {
                     if (!(cin >> newCatId)) {
                         cin.clear();
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                        cout << "Invalid input!" << endl;
+                        cout << "\nInvalid input!" << endl;
                         cout << "Please enter a number" << endl;
                         continue;
                     }
@@ -717,7 +674,9 @@ void updateItem(const int &UserId) {
                 while (true) {
 
                     cout << "Enter item's expiration date (YYYY-MM-DD): ";
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    if (cin.peek() == '\n') {
+                        cin.ignore();
+                    }
                     getline(cin, newItemExp);
 
                     if (ItemExp.empty()) {
@@ -1028,7 +987,7 @@ void viewCategories() {
         cout << "Enter your choice: ";
 
         if (!(cin >> option)) {
-            cout << "Invalid input!" << endl;
+            cout << "\nInvalid input!" << endl;
             cout << "Please enter a number" << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -1048,9 +1007,9 @@ void mainMenu(const int &UserId) {
     int choice;
 
     while (true) {
-        cout << "\n====== PantryPal ======\n";
 
         while (true) {
+            cout << "\n====== PantryPal ======\n";
             cout << "\n1. View items" << endl;
             cout << "2. Add item" << endl;
             cout << "3. Update item" << endl;
@@ -1061,7 +1020,7 @@ void mainMenu(const int &UserId) {
             cout << "Enter your choice: ";
 
             if (!(cin >> choice)) {
-                cout << "Invalid input!" << endl;
+                cout << "\nInvalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -1089,7 +1048,7 @@ void mainMenu(const int &UserId) {
             viewCategories();
         }
         else if (choice == 7) {
-            cout << "Goodbye!" << endl;
+            cout << "\nGoodbye!" << endl;
             break;
         }
         else {
@@ -1097,113 +1056,6 @@ void mainMenu(const int &UserId) {
         }
     }
 }
-
-void HomePage(const int &UserId, CurrentUser &Profile) {
-    int userOption;
-
-    while (true) {
-        cout << "\n====== PantryPal ======\n";
-        cout << "=======  Home Page  =======\n";
-
-        cout << "\n1. View your Cart"
-             << "\n2. View your profile"
-             << "\n3. View Alerts"
-             << "\n4. Sign Off"
-             << "\n\nEnter your choice: ";
-
-        if (!(cin >> userOption)) {
-            cout << "\nInvalid input. Please enter a number.\n";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            continue;
-        }
-
-        if (userOption == 1) {
-            mainMenu(UserId);
-        }
-        else if (userOption == 2) {
-            int profileOption;
-
-            while (true) {
-                cout << "\n====== Profile ======\n";
-                cout << "Username: " << Profile.getUsername() << endl;
-                cout << "Email: " << Profile.getEmail() << endl;
-                cout << "Created On " << Profile.getCreated_on() << endl;
-
-                cout << "\n1. Back to Home Page" << endl;
-                cout << "2. Edit Profile" << endl;
-                cout << "Enter your choice: ";
-
-                if (!(cin >> profileOption)) {
-                    cout << "\nInvalid input. Please enter a number.\n";
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    continue;
-                }
-
-                if (profileOption == 1) {
-                    break;
-                }
-                else if (profileOption == 2) {
-                    int editOption;
-
-                    while (true) {
-                        cout << "\n=== Editing Profile ===" << endl;
-                        cout << "\n1. Edit Username"
-                             << "\n2. Edit Email"
-                             << "\n3. Edit Password"
-                             << "\n4. Go back"
-                             << "\nEnter your choice: ";
-
-                        if (!(cin >> editOption)) {
-                            cout << "\nInvalid input. Please enter a number.\n";
-                            cin.clear();
-                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                            continue;
-                        }
-
-                        if (editOption == 1) {
-                            Profile.ChangeUsername();
-                            cout << "\nUsername changed successfully!" << endl;
-                        }
-                        else if (editOption == 2) {
-                            Profile.ChangeEmail();
-                            cout << "\nEmail changed successfully!" << endl;
-                        }
-                        else if (editOption == 3) {
-                            Profile.ChangePassword();
-                            cout << "\nPassword changed successfully!" << endl;
-                        }
-                        else if (editOption == 4) {
-                            break;
-                        }
-                        else {
-                            cout << "\nInvalid choice. Try again.\n";
-                        }
-                    }
-                }
-                else {
-                    cout << "\nInvalid choice. Try again.\n";
-                }
-            }
-        }
-
-        else if (userOption == 3) {
-            cout << "\nNo alerts currently.\n";
-            //Implement expiration alerts here
-        }
-        else if (userOption == 4) {
-            cout << "See ya later " << Profile.getUsername() << endl;
-            break;
-        }
-        else {
-            cout << "\nInvalid choice. Try again.\n";
-        }
-    }
-}
-
-
-
 
 int main() {
     try {
@@ -1291,7 +1143,6 @@ int main() {
         std::cerr << "Connection error: " << err.what() << std::endl;
     }
 
-
     int UserID;
     bool validpassword = false;
     bool validEmail = false;
@@ -1300,14 +1151,12 @@ int main() {
     string Username, Email, Password, Created_on;
 
 
-    while (UsingApp) {
         cout << "Welcome to PantryPal" << endl;
         cout << "Would you like to create an account? (Y/N)" << endl;
         cin >> UsersResponse;
         if ((UsersResponse == 'Y') || (UsersResponse == 'y')) {
             cout << "Please create a username (Maximum characters is 254):" << endl;
             cin >> Username;
-
             while (Username.length() > 254) {
                 cout << "Invalid username" << endl;
                 cout << "Please create a username (Maximum characters is 254): ";
@@ -1339,14 +1188,14 @@ int main() {
 
                 if (!validpassword) {
                     cout << "Please enter a valid password: ";
-                    getline(cin,Password);
+                     getline(cin,Password);
                 }
             }
 
 
 
             cout << "Please enter your email: " << endl;
-            getline(cin,Email);
+           getline(cin,Email);
 
             while (!validEmail) {
 
@@ -1428,116 +1277,113 @@ int main() {
                         Created_on = row[1].get<string>();
                     }
 
-                    CurrentUser Profile (Email, Password, Username, UserID, Created_on);
+                        CurrentUser Profile (Email, Password, Username, UserID, Created_on);
 
-                    cout << "Account created successfully!" << endl;
-                    cout << "Welcome to The Pantry Pal: " << Profile.getUsername() << endl;
-
-                    HomePage(UserID, Profile);
+                        cout << "Account created successfully!" << endl;
+                        cout << "Welcome to The Pantry Pal: " << Profile.getUsername() << endl;
+                    }
                 }
+
+                mainMenu(UserID); // only if email is valid
+
+
+                UsingApp = false;
+
 
             }
 
-            UsingApp = false;
-
-        }
 
 
+else if (UsersResponse == 'N' || UsersResponse == 'n') {
+    while (UsingApp) {
 
-        else if (UsersResponse == 'N' || UsersResponse == 'n') {
+        bool validlogin = false;
+        string Username, Email, Password, Created_on;
+        int UserId;
 
+        cout << "Would you like to log into an existing account (Y/N)";
+        cin >> UsersResponse;
+        if (UsersResponse == 'Y' || UsersResponse == 'y') {
+            mysqlx::Session session ("127.0.0.1", 33060, "root", "noelmehari1");
 
-            bool validlogin = false;
-            string Username, Email, Password, Created_on;
-            int UserId;
+            mysqlx::Schema DB = session.getSchema("PantryPal");
 
-            cout << "Would you like to log into an existing account (Y/N)";
-            cin >> UsersResponse;
-            if (UsersResponse == 'Y' || UsersResponse == 'y') {
+            mysqlx::Table Users = DB.getTable("User");
 
-                mysqlx::Session session ("127.0.0.1", 33060, "root", "noelmehari1");
+            cout << "\nPlease enter your Email: ";
+            cin >> Email;
 
-                mysqlx::Schema DB = session.getSchema("PantryPal");
+            while (validlogin == false){
 
-                mysqlx::Table Users = DB.getTable("User");
+                validlogin = true;
 
-                cout << "\nPlease enter your Email: ";
-                cin >> Email;
+                auto Read = Users
+                .select("Password")
+                .where("Email = :email")
+                .bind("email", Email)
+                .execute();
 
-                while (validlogin == false){
-
-                    validlogin = true;
-
-                    auto Read = Users
-                    .select("Password")
-                    .where("Email = :email")
-                    .bind("email", Email)
-                    .execute();
-
-                    if (Read.count() == 0) {
-                        cout << "Email not found. Please try again." << endl; //prompting for email login check
-                        validlogin = false;
-                        cout << "Enter your Email: ";
-                        cin >> Email;
-                    }
+                if (Read.count() == 0) {
+                    cout << "Email not found. Please try again." << endl; //prompting for email login check
+                    validlogin = false;
+                    cout << "Enter your Email: ";
+                    cin >> Email;
+                }
 
 
-                    else {
-                        cout << "Please enter your password: ";
-                        cin >> Password;
-                        mysqlx::Row row = Read.fetchOne();
-                        string storedPassword = row[0].get<string>();
+                else {
+                    cout << "Please enter your password: ";
+                    cin >> Password;
+                    mysqlx::Row row = Read.fetchOne();
+                    string storedPassword = row[0].get<string>();
 
-                        for (size_t i = 3; i > 0; i--) {
-                            if (Password == storedPassword) {
-                                cout << "Password is correct!" << endl;
+                    for (size_t i = 3; i > 0; i--) {
+                        if (Password == storedPassword) {
+                            cout << "Password is correct!" << endl;
 
 
 
-                                auto result = Users.select("Username", "DATE_FORMAT (created_on, '%Y-%m-%d %H:%i:%s')")
-                                .where("Email = :email")
-                                .bind("email", Email)
-                                .execute();
+                            auto result = Users.select("Username", "DATE_FORMAT (created_on, '%Y-%m-%d %H:%i:%s')")
+                            .where("Email = :email")
+                            .bind("email", Email)
+                            .execute();
 
-                                auto row = result.fetchOne();
-                                if (row) {
-                                    Username = row[0].get<string>();
-                                    Created_on = row[1].get<string>();
-                                }
-
-                                UserId = findUserId(Users, Email);
-
-
-                                CurrentUser Profile (Email, Password, Username, UserId, Created_on);
-
-
-
-                                cout << "Account logged in successfully!" << endl;
-                                cout << "Welcome back to The Pantry Pal: " << Profile.getUsername() << endl;
-
-                                HomePage(UserId, Profile);
-
-                                break;
-
+                            auto row = result.fetchOne();
+                            if (row) {
+                                Username = row[0].get<string>();
+                                Created_on = row[1].get<string>();
                             }
-                            else {
-                                cout << "Password is incorrect!" << endl;
-                                cout << "Please try again. (Attempts remaining: " << i - 1 << ")" << endl;
-                                cout << "Please enter your password: ";
-                                cin >> Password;
-                                if (i == 1) {
-                                    UsingApp = false;
-                                    cerr << "Too many incorrect attempts. Please try again later." << endl;
-                                    return 0;
-                                }
+
+                            UserId = findUserId(Users, Email);
+
+
+                            CurrentUser Profile (Email, Password, Username, UserId, Created_on);
+
+
+
+                            cout << "Account logged in successfully!" << endl;
+                            cout << "Welcome back to The Pantry Pal: " << Profile.getUsername() << endl; //Adjust this code to make it output username in the if-statement
+                            break;
+
+                        }
+                        else {
+                            cout << "Password is incorrect!" << endl;
+                            cout << "Please try again. (Attempts remaining: " << i - 1 << ")" << endl;
+                            cout << "Please enter your password: ";
+                            cin >> Password;
+                            if (i == 1) {
+                                UsingApp = false;
+                                cerr << "Too many incorrect attempts. Please try again later." << endl;
+                                return 0;
                             }
                         }
                     }
                 }
 
-           //mainMenu(UserId);
+                mainMenu(UserId);
 
-            UsingApp = false; //change later
+                UsingApp = false; //change later
+            }
         }
         else if (UsersResponse == 'N' || UsersResponse == 'n') {
             UsingApp = false;
@@ -1545,8 +1391,5 @@ int main() {
     }
 }
     else {UsingApp = false;}
-
     return 0;
 }
-
-
