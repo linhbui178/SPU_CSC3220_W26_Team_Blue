@@ -174,7 +174,7 @@ void printCategories() {
 
         else {
             do {
-                cout << row[0].get<int>() << "   " << row[1].get<string>() << endl;
+                cout << row[0].get<int>() << "." << row[1].get<string>() << endl;
             }
             while (row = result.fetchOne());
         }
@@ -243,7 +243,7 @@ void viewItems(const int &UserId) {
             break;
         }
 
-        cout << "Invalid choice" << endl;
+        cout << "\nInvalid choice" << endl;
     }
 }
 
@@ -255,7 +255,6 @@ void addItem(const int &UserId) {
         cout << "\n=== Add Item ===\n";
 
         // get item name
-
         while (true) {
             cout << "\nEnter item name (Maximum characters is 254): ";
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -291,18 +290,17 @@ void addItem(const int &UserId) {
             if (!(cin >> CatId)) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input!" << endl;
+                cout << "\nInvalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 continue;
             }
             if (!categoryExists(CatId)) {
-                cout << "Invalid choice" << endl;
+                cout << "\nInvalid choice" << endl;
             }
             break;
         }
 
         // get item description
-
         while (true) {
             cout << "Enter item description (Press Enter to skip): ";
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -317,10 +315,10 @@ void addItem(const int &UserId) {
             cout << "Item description too long" << endl;
         }
 
-
         while (true) {
 
-            cout << "Input the item's Expiration date (YYYY-MM-DD): ";
+            cout << "Enter item's expiration date (YYYY-MM-DD): ";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             getline(cin, ItemExp);
 
             if (ItemExp.empty()) {
@@ -361,6 +359,7 @@ void addItem(const int &UserId) {
         }
 
 
+
         // add item
         try {
             mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
@@ -391,7 +390,7 @@ void addItem(const int &UserId) {
             }
 
             if (option != 1 && option != 2) {
-                cout << "Invalid choice" << endl;
+                cout << "\nInvalid choice" << endl;
                 continue;
             }
 
@@ -409,8 +408,8 @@ void addItem(const int &UserId) {
 
 void updateItem(const int &UserId) {
 
-    int choice, ItemId, ItemQuant, newItemQuant, option, CatId;
-    string ItemName, ItemCategory, ItemDesc, newItemName, newItemCat, newItemDesc;
+    int choice, ItemId, ItemQuant, newItemQuant, option, CatId, newCatId;
+    string ItemName, ItemCategory, ItemDesc, newItemName, newItemCat, newItemDesc, ItemExp, newItemExp;
 
     while (true) {
 
@@ -450,8 +449,47 @@ void updateItem(const int &UserId) {
         }
 
         // print item details TO BE IMPLEMENT
+        try {
+            mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
+            session.sql("USE PantryPal").execute();
 
-        // update expiration date TO BE IMPLEMENT
+            auto result = session.sql("SELECT ItemId, Item.CatId, CatName, ItemQuant, ItemDesc, "
+                                        "DATE_FORMAT(Added_on, '%Y-%m-%d') AS Added_on, "
+                                        "DATE_FORMAT(Exp_date, '%Y-%m-%d') AS Exp_date "
+                                        "FROM Item "
+                                        "JOIN Category ON Item.CatId = Category.CatId "
+                                        "WHERE ItemName = ? AND UserId = ?")
+                                    .bind(ItemName)
+                                    .bind(UserId)
+                                    .execute();
+
+            auto row = result.fetchOne();
+            if (!row) {
+                cout << "Item not found." << endl;
+            }
+
+            else {
+                ItemId = row[0].get<int>();
+                CatId = row[1].get<int>();
+                ItemQuant = row[3].get<int>();
+                ItemDesc = row[4].get<string>();
+                ItemExp = row[6].get<string>();
+
+                cout << "\nCurrent Item Information\n";
+                cout << "-------------------------\n";
+                cout << "Name: " << ItemName << endl;
+                cout << "Category: " << row[2].get<string>() << endl;
+                cout << "Quantity: " << ItemQuant << endl;
+                if (ItemDesc.find_first_not_of(" \t\n\r") != string::npos) {
+                    cout << "  Description: " << ItemDesc << endl;
+                }
+                cout << "Added on: " << row[5].get<string>()  << endl;
+                cout << "Expiry date: " << ItemExp << endl;
+            }
+        }
+        catch (const mysqlx::Error &err) {
+            cerr << "\nConnection error: " << err.what() << endl;
+        }
 
         while (true) {
 
@@ -459,7 +497,8 @@ void updateItem(const int &UserId) {
             cout << "2. Update item quantity" << endl;
             cout << "3. Update item category" << endl;
             cout << "4. Update item description" << endl;
-            cout << "5. Done updating" << endl;
+            cout << "5. Update item expiration date" << endl;
+            cout << "6. Done updating" << endl;
             cout << "Enter your choice: ";
 
             if (!(cin >> choice)) {
@@ -579,29 +618,59 @@ void updateItem(const int &UserId) {
                 }
             }
 
-            else if (choice == 3) {
-                // update item category
+            else if (choice == 3) { // update item category
+
+                // get item category
                 printCategories();
                 while (true) {
                     cout << "Enter new category number: ";
-                    if (!(cin >> CatId)) {
+                    if (!(cin >> newCatId)) {
                         cin.clear();
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
                         cout << "Invalid input!" << endl;
                         cout << "Please enter a number" << endl;
                         continue;
                     }
-                    if (!categoryExists(CatId)) {
-                        cout << "Invalid choice" << endl;
+                    if (!categoryExists(newCatId)) {
+                        cout << "\nInvalid choice" << endl;
                     }
                     break;
+                }
+
+                // update item category
+                try {
+                    mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
+                    mysqlx::Schema DB = session.getSchema("PantryPal");
+                    mysqlx::Table Item = DB.getTable("Item");
+
+                    if (CatId == newCatId) {
+                        cout << "\nNo change was made" << endl;
+                    }
+
+                    else if (ItemId != -1) {
+                        Item.update()
+                            .set("CatId", newCatId)
+                            .where("ItemId = :item_id and UserId = :user_id")
+                            .bind("item_id", ItemId)
+                            .bind("user_id", UserId)
+                            .execute();
+                        cout << "\nItem category changed successfully!" << endl;
+                        CatId = newCatId;
+                    }
+
+                    else {
+                        cout << "\nItem not found" << endl;
+                    }
+
+                }
+                catch (const mysqlx::Error &err) {
+                    cerr << "\nConnection error: " << err.what() << endl;
                 }
             }
 
             else if (choice == 4) { // update item description
 
                 // get item description
-                // include case when new item desc same as before TO BE IMPLEMENT
                 while (getline(cin, newItemDesc)) {
                     cout << "Enter new item description: ";
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -642,12 +711,80 @@ void updateItem(const int &UserId) {
                 }
             }
 
-            else if (choice == 5) {
-                break;
+            else if (choice == 5) { // update expiration date
+
+                // get expiration date
+                while (true) {
+
+                    cout << "Enter item's expiration date (YYYY-MM-DD): ";
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    getline(cin, newItemExp);
+
+                    if (ItemExp.empty()) {
+                        cout << "Expiration date required\n";
+                        continue;
+                    }
+
+                    if (!validDate(newItemExp)) {
+                        cout << "Invalid date format\n";
+                        continue;
+                    }
+
+                    // Get today's date
+                    time_t now = time(nullptr);
+                    tm* today = localtime(&now);
+
+                    char buffer[11];
+                    strftime(buffer, sizeof(buffer), "%Y-%m-%d", today);
+
+                    string todayStr(buffer);
+
+                    if (newItemExp < todayStr) {
+                        cout << "Expiration date cannot be before today\n";
+                        continue;
+                    }
+
+                    cout << "Valid expiration date entered.\n";
+                    break; // valid input
+
+                }
+
+                // update item expiration date
+                try {
+                    mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
+                    mysqlx::Schema DB = session.getSchema("PantryPal");
+                    mysqlx::Table Item = DB.getTable("Item");
+
+                    if (ItemExp == newItemExp) {
+                        cout << "\nNo change was made" << endl;
+                    }
+
+                    else if (ItemId != -1) {
+                        Item.update()
+                            .set("Exp_date", newItemExp)
+                            .where("ItemId = :item_id and UserId = :user_id")
+                            .bind("item_id", ItemId)
+                            .bind("user_id", UserId)
+                            .execute();
+                        cout << "\nItem expiration date changed successfully!" << endl;
+                        ItemExp = newItemExp;
+                    }
+
+                    else {
+                        cout << "\nItem not found" << endl;
+                    }
+
+                }
+                catch (const mysqlx::Error &err) {
+                    cerr << "Connection error: " << err.what() << endl;
+                }
             }
 
+            else if (choice == 6) {
+                break;
+            }
             else {
-                cout << "Invalid choice" << endl;
+                cout << "\nInvalid choice" << endl;
             }
         }
 
@@ -877,7 +1014,7 @@ void viewCategories() {
 
         else {
             do {
-                cout << row[0].get<int>() << "   " << row[1].get<string>() << endl;
+                cout << row[0].get<int>() << "." << row[1].get<string>() << endl;
             }
             while (row = result.fetchOne());
         }
@@ -902,7 +1039,7 @@ void viewCategories() {
             break;
         }
 
-        cout << "Invalid choice" << endl;
+        cout << "\nInvalid choice" << endl;
     }
 }
 
@@ -1069,9 +1206,8 @@ void HomePage(const int &UserId, CurrentUser &Profile) {
 
 
 int main() {
-
     try {
-        mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");  //Creating the user table locally
+        mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
 
         session.sql("CREATE DATABASE IF NOT EXISTS PantryPal").execute();
         session.sql("USE PantryPal").execute();
@@ -1166,7 +1302,7 @@ int main() {
 
     while (UsingApp) {
         cout << "Welcome to PantryPal" << endl;
-        cout << "Would you like to create an account? (Y/N)"  << endl;
+        cout << "Would you like to create an account? (Y/N)" << endl;
         cin >> UsersResponse;
         if ((UsersResponse == 'Y') || (UsersResponse == 'y')) {
             cout << "Please create a username (Maximum characters is 254):" << endl;
@@ -1255,7 +1391,7 @@ int main() {
 
 
 
-                mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
+            mysqlx::Session session("127.0.0.1", 33060, "root", "noelmehari1");
 
                 mysqlx::Schema DB = session.getSchema("PantryPal");
 
@@ -1399,16 +1535,18 @@ int main() {
                     }
                 }
 
-                UsingApp = false; //change later
-            }
-            else if (UsersResponse == 'N' || UsersResponse == 'n') {
-                UsingApp = false;
-            }
+           //mainMenu(UserId);
+
+            UsingApp = false; //change later
         }
-
-
-        else {UsingApp = false;}
+        else if (UsersResponse == 'N' || UsersResponse == 'n') {
+            UsingApp = false;
+        }
     }
+}
+    else {UsingApp = false;}
 
     return 0;
 }
+
+
