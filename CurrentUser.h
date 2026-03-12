@@ -22,14 +22,15 @@ public:
     CurrentUser(string email, string password, string username, int user_id, string created_on);
     string Username;
     string Email;
-    void ChangeEmail(string email);
-    void ChangePassword(string password);
-    void ChangeUsername(string username);
+    void ChangeEmail();
+    void ChangePassword();
+    void ChangeUsername();
     int getUserId();
     string getCreated_on();
     string getPassword();
     string getUsername();
     string getEmail();
+    void PasswordValidation();
 
 };
 
