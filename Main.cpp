@@ -232,7 +232,7 @@ void viewItems(const int &UserId) {
         cout << "Enter your choice: ";
 
         if (!(cin >> option)) {
-            cout << "\nInvalid input!" << endl;
+            cout << "Invalid input!" << endl;
             cout << "Please enter a number" << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -276,7 +276,7 @@ void addItem(const int &UserId) {
             if (!(cin >> ItemQuant)) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "\nInvalid input!" << endl;
+                cout << "Invalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 continue;
             }
@@ -315,13 +315,10 @@ void addItem(const int &UserId) {
             cout << "Item description too long" << endl;
         }
 
-        // get expiration date
         while (true) {
 
             cout << "Enter item's expiration date (YYYY-MM-DD): ";
-            if (cin.peek() == '\n') {
-                cin.ignore();
-            }
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             getline(cin, ItemExp);
 
             if (ItemExp.empty()) {
@@ -385,7 +382,7 @@ void addItem(const int &UserId) {
             cout << "Enter your choice: ";
 
             if (!(cin >> option)) {
-                cout << "\nInvalid input!" << endl;
+                cout << "Invalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -630,7 +627,7 @@ void updateItem(const int &UserId) {
                     if (!(cin >> newCatId)) {
                         cin.clear();
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                        cout << "\nInvalid input!" << endl;
+                        cout << "Invalid input!" << endl;
                         cout << "Please enter a number" << endl;
                         continue;
                     }
@@ -720,9 +717,7 @@ void updateItem(const int &UserId) {
                 while (true) {
 
                     cout << "Enter item's expiration date (YYYY-MM-DD): ";
-                    if (cin.peek() == '\n') {
-                        cin.ignore();
-                    }
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     getline(cin, newItemExp);
 
                     if (ItemExp.empty()) {
@@ -1033,7 +1028,7 @@ void viewCategories() {
         cout << "Enter your choice: ";
 
         if (!(cin >> option)) {
-            cout << "\nInvalid input!" << endl;
+            cout << "Invalid input!" << endl;
             cout << "Please enter a number" << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -1053,9 +1048,9 @@ void mainMenu(const int &UserId) {
     int choice;
 
     while (true) {
+        cout << "\n====== PantryPal ======\n";
 
         while (true) {
-            cout << "\n====== PantryPal ======\n";
             cout << "\n1. View items" << endl;
             cout << "2. Add item" << endl;
             cout << "3. Update item" << endl;
@@ -1066,7 +1061,7 @@ void mainMenu(const int &UserId) {
             cout << "Enter your choice: ";
 
             if (!(cin >> choice)) {
-                cout << "\nInvalid input!" << endl;
+                cout << "Invalid input!" << endl;
                 cout << "Please enter a number" << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -1094,7 +1089,7 @@ void mainMenu(const int &UserId) {
             viewCategories();
         }
         else if (choice == 7) {
-            cout << "\nGoodbye!" << endl;
+            cout << "Goodbye!" << endl;
             break;
         }
         else {
@@ -1548,9 +1543,8 @@ int main() {
             UsingApp = false;
         }
     }
-    else {UsingApp = false;}
 }
-
+    else {UsingApp = false;}
 
     return 0;
 }
